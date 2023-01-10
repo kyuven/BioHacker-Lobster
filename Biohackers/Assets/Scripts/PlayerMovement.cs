@@ -11,7 +11,18 @@ public class PlayerMovement : MonoBehaviour
     public float velocityPower;
     private Vector2 _moveInput;
 
+    [Header("Jump")]
+    public float jumpForce;
+    private float jumpBufferLength = .1f;
+    private float jumpBufferCounter;
+    private float coyoteTime = .2f;
+    private float coyoteCounter;
+
+    private bool isGrounded;
+
     [SerializeField] private Rigidbody2D rig;
+    [SerializeField] private Transform groundCheckPoint;
+    [SerializeField] private LayerMask groundLayer;
     // Start is called before the first frame update
     void Start()
     {
@@ -23,11 +34,30 @@ public class PlayerMovement : MonoBehaviour
     void Update()
     {
         _moveInput.x = Input.GetAxisRaw("Horizontal");
+        isGrounded = Physics2D.OverlapCircle(groundCheckPoint.position, .1f, groundLayer);
     }
 
     void FixedUpdate()
     {
         Move();
+        #region Jump
+        if(Input.GetButtonDown("Jump"))
+            jumpBufferCounter = jumpBufferLength;
+        else
+            jumpBufferCounter -= Time.deltaTime;
+
+        if(isGrounded)
+            coyoteCounter = coyoteTime;
+        else
+            coyoteCounter -= Time.deltaTime;
+
+        if(jumpBufferCounter >= 0 && coyoteCounter > 0f)
+            rig.velocity = new Vector2(rig.velocity.x, jumpForce);
+            jumpBufferCounter = 0;
+
+        if(Input.GetButtonUp("Jump") && rig.velocity.y > 0)
+            rig.velocity = new Vector2(rig.velocity.x, rig.velocity.y * .5f);
+        #endregion
     }
 
     void Move()
