@@ -20,9 +20,11 @@ public class PlayerMovement : MonoBehaviour
 
     private bool isGrounded;
 
+    [Space(15)]
     [SerializeField] private Rigidbody2D rig;
     [SerializeField] private Transform groundCheckPoint;
     [SerializeField] private LayerMask groundLayer;
+
     // Start is called before the first frame update
     void Start()
     {
