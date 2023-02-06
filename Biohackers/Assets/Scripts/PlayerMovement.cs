@@ -18,6 +18,13 @@ public class PlayerMovement : MonoBehaviour
     private float coyoteTime = .2f;
     private float coyoteCounter;
 
+    [Header("Dash")]
+    private bool canDash = true;
+    private bool isDashing;
+    private float dashPower = 70f;
+    private float dashTime = 0.2f;
+    private float dashCounter = 1f;
+
     private bool isGrounded;
 
     [Space(15)]
@@ -41,6 +48,10 @@ public class PlayerMovement : MonoBehaviour
 
     void FixedUpdate()
     {
+        if(Input.GetKeyDown(KeyCode.LeftShift) && canDash)
+            StartCoroutine(Dash());
+
+        Flip();
         Move();
         #region Jump
         if(Input.GetButtonDown("Jump"))
@@ -70,5 +81,30 @@ public class PlayerMovement : MonoBehaviour
         float movement = (Mathf.Pow(Mathf.Abs(speedDiff) * accelRate, velocityPower) * Mathf.Sign(speedDiff));
 
         rig.AddForce(movement * Vector2.right);
+
+        if(_moveInput.x > 0)
+            transform.eulerAngles = new Vector3(0, 0, 0);
+        if(_moveInput.x < 0)
+            transform.eulerAngles = new Vector3(0, 180, 0);
+    }
+
+    void Flip()
+    {
+
+    }
+
+    IEnumerator Dash()
+    {
+        canDash = false;
+        isDashing = true;
+        // tira a gravidade do player durante o dash
+        float originalGravity = rig.gravityScale;
+        rig.gravityScale = 0f;
+        rig.velocity = new Vector2(transform.localScale.x * dashPower, 0f);
+        yield return new WaitForSeconds(dashTime);
+        rig.gravityScale = originalGravity;
+        isDashing = false;
+        yield return new WaitForSeconds(dashCounter);
+        canDash = true;
     }
 }
